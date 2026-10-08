@@ -6,6 +6,8 @@ public class playerController : MonoBehaviour
     public float speed = 5f;
     public float gravity = -20f;
     public float jumpHeight = 2f;
+    public Transform spawnPoint;
+
     private CharacterController controller;
     private Vector2 moveInput;
     private float verticalVelocity;
@@ -18,7 +20,7 @@ public class playerController : MonoBehaviour
     void Update()
     {
         bool isGrounded = controller.isGrounded;
-        if (isGrounded && verticalVelocity > 0)
+        if (isGrounded && verticalVelocity < 0)
         {
             verticalVelocity = -2f;           
         }
@@ -37,7 +39,7 @@ public class playerController : MonoBehaviour
     public void OnMove(InputValue value)
     {
         moveInput = value.Get<Vector2>();
-        Debug.Log("OnMove Llamado." + moveInput);
+        //Debug.Log("OnMove Llamado." + moveInput);
     }
 
     public void OnJump(InputValue value)
@@ -45,10 +47,25 @@ public class playerController : MonoBehaviour
         if (value.isPressed)
         {
             jumpPressed = true;
-            Debug.Log("OnJump Llamado.");
+            //Debug.Log("OnJump Llamado.");
         }
     }
 
+    public void SetSpawnPoint(Transform newSpawnPoint)
+    {
+        spawnPoint = newSpawnPoint;
+    }
+
+
+
+
+    public void Die()
+    {
+        controller.enabled = false;
+        transform.position = spawnPoint.position;
+        verticalVelocity = 0f;
+        controller.enabled = true;
+    }
 
 
 
