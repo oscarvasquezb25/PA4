@@ -1,3 +1,4 @@
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,6 +8,8 @@ public class playerController : MonoBehaviour
     public float gravity = -20f;
     public float jumpHeight = 2f;
     public Transform spawnPoint;
+    public float respawnHeightOffset = 2f;
+    public float rotationSpeed = 10f;
 
     private CharacterController controller;
     private Vector2 moveInput;
@@ -30,9 +33,26 @@ public class playerController : MonoBehaviour
             jumpPressed = false;
         }
 
-        verticalVelocity += gravity * Time.deltaTime;        
-        Vector3 move = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
-        move.y= verticalVelocity / speed;
+        verticalVelocity += gravity * Time.deltaTime;
+
+        //Vector3 move = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+        //move.y= verticalVelocity / speed;
+
+        //Direccion del movimiento 
+        Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y);
+
+        //rotacion del player
+        if (moveDirection.magnitude > 0.1f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
+
+        //Movimiento original del player
+        Vector3 move = moveDirection.normalized;
+        move.y = verticalVelocity / speed;
+
         controller.Move(move * speed * Time.deltaTime);
     }
 
@@ -57,12 +77,12 @@ public class playerController : MonoBehaviour
     }
 
 
-
-
     public void Die()
     {
         controller.enabled = false;
-        transform.position = spawnPoint.position;
+
+        Vector3 respawnPosition = spawnPoint.position + Vector3.up * respawnHeightOffset;
+        transform.position = respawnPosition;
         verticalVelocity = 0f;
         controller.enabled = true;
     }
