@@ -46,6 +46,4 @@ public class CameraController : MonoBehaviour
         // Hacer que la cámara mire al objetivo
         transform.rotation = Quaternion.LookRotation(target.position - transform.position); // para que la cámara mire al objetivo
     }
-}
-
-    
+}    

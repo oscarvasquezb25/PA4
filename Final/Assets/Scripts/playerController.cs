@@ -10,36 +10,65 @@ public class playerController : MonoBehaviour
     public Transform spawnPoint;
     public float respawnHeightOffset = 2f;
     public float rotationSpeed = 10f;
+    Transform cameraTransform;
 
     private CharacterController controller;
     private Vector2 moveInput;
     private float verticalVelocity;
     private bool jumpPressed;
 
+    private Animator animator;
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
+
+        cameraTransform = Camera.main.transform;
+
+        animator = GetComponentInChildren<Animator>();
     }
     void Update()
     {
         bool isGrounded = controller.isGrounded;
+        float speedValue = moveInput.magnitude;
+
+        animator.SetFloat("Speed", speedValue);
+        
+        //Animator en el suelo
+        animator.SetBool("IsGrounded", isGrounded);
+
         if (isGrounded && verticalVelocity < 0)
         {
             verticalVelocity = -2f;           
         }
+
+        //Salto
         if (jumpPressed && isGrounded)
         {
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
             jumpPressed = false;
+
+            //animator - salto
+            animator.SetTrigger("Jump");
         }
 
         verticalVelocity += gravity * Time.deltaTime;
 
-        //Vector3 move = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
-        //move.y= verticalVelocity / speed;
+        //Aaniator -  velocidad vertical
+        animator.SetFloat("VerticalVelocity", verticalVelocity);
 
-        //Direccion del movimiento 
-        Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y);
+        //movimiento relativo a la camara
+        Vector3 forward = cameraTransform.forward;
+        Vector3 right = cameraTransform.right;
+
+        //Evitar inclinacion vertical
+        forward.y = 0f;
+        right.y = 0f;
+
+        forward.Normalize();
+        right.Normalize();
+
+        Vector3 moveDirection = forward * moveInput.y + right * moveInput.x;
 
         //rotacion del player
         if (moveDirection.magnitude > 0.1f)
