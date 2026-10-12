@@ -4,20 +4,30 @@ using UnityEngine.InputSystem;
 
 public class playerController : MonoBehaviour
 {
-    public float speed = 5f;
-    public float gravity = -20f;
-    public float jumpHeight = 2f;
-    public Transform spawnPoint;
-    public float respawnHeightOffset = 2f;
-    public float rotationSpeed = 10f;
+    public float speed = 8f; // Velocidad de movimiento del jugador
+    public float gravity = -20f; // Gravedad aplicada al jugador
+    public float jumpHeight = 2f; // Altura del salto del jugador
+    public Transform spawnPoint; // Punto de reaparición del jugador
+    public float respawnHeightOffset = 2f; // Offset vertical para la reaparición del jugador
+    public float rotationSpeed = 10f; // Velocidad de rotación del jugador
     Transform cameraTransform;
 
     private CharacterController controller;
     private Vector2 moveInput;
-    private float verticalVelocity;
-    private bool jumpPressed;
+    private float verticalVelocity; // Variable para controlar la velocidad vertical del jugador
+    private bool jumpPressed; // Variable para controlar el salto
 
     private Animator animator;
+    //private bool isDead = false; //Nuevo para el Bouser direccional cuando muere el player
+    //private bool isBoucing = false; //Nuevo para el Bouser direccional cuando muere el player
+
+    public Vector3 externalMoveSpeed; //Variable para el movimiento externo (por ejemplo, empujado por un enemigo o una fuerza externa)
+
+    //Clase power-Up
+    public bool canShoot = false; // Para decir que el player ya recolcto
+    public GameObject powerEffect; // Efecto visual del power-up
+
+
 
     void Start()
     {
@@ -26,14 +36,20 @@ public class playerController : MonoBehaviour
         cameraTransform = Camera.main.transform;
 
         animator = GetComponentInChildren<Animator>();
+
+        //Clase Power-Up
+        if (powerEffect != null)
+        {
+            powerEffect.SetActive(false); // Desactivar el efecto visual al inicio
+        }
     }
     void Update()
     {
-        bool isGrounded = controller.isGrounded;
-        float speedValue = moveInput.magnitude;
+        bool isGrounded = controller.isGrounded; // Verificar si el jugador está en el suelo
+        float speedValue = moveInput.magnitude; // Valor de velocidad basado en la magnitud del input de movimiento
 
-        animator.SetFloat("Speed", speedValue);
-        
+        animator.SetFloat("Speed", speedValue); // Actualizar el parámetro de velocidad en el Animator
+
         //Animator en el suelo
         animator.SetBool("IsGrounded", isGrounded);
 
@@ -70,7 +86,7 @@ public class playerController : MonoBehaviour
 
         Vector3 moveDirection = forward * moveInput.y + right * moveInput.x;
 
-        //rotacion del player
+        //Rotacion del player
         if (moveDirection.magnitude > 0.1f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
@@ -117,5 +133,14 @@ public class playerController : MonoBehaviour
     }
 
 
-
+    //Clase Power-Up
+    public void UnlockShottPower()
+    {
+        canShoot = true;
+        if (powerEffect != null)
+        {
+            powerEffect.SetActive(true); // Activar el efecto visual cuando se desbloquea el power-up
+        }
+        Debug.Log("Power-Up optenido.");
+    }
 }
